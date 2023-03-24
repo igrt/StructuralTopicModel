@@ -8,6 +8,8 @@ library("igraph")
 library("stminsights")
 library("tidyverse")
 library("ggplot2")
+library("tidytext")
+library("reshape2")
 
 # Read documents
 setwd("~/Desktop/media framing-newspaper data/")
@@ -47,18 +49,11 @@ topicNames <- c("Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5", "Topic 6"
 par(bty="n",col="grey40",lwd=5)
 plot.STM(First_STM, type = "summary", custom.labels = "", topic.names = topicNames)
 
-# Install and load the 'reshape2' package
-if (!requireNamespace("reshape2", quietly = TRUE)) {
-  install.packages("reshape2")
-}
-library("reshape2")
-
 # Plot word distribution in selected topics
 tidy_stm <- tidytext::tidy(First_STM)
 selected_topics <- c(1, 2, 11, 13, 15, 16)
 
 # Modify these numbers based on the topics you want to display
-
 tidy_stm_filter <- filter(tidy_stm, topic %in% selected_topics)
 
 tidy_stm_filter %>%
@@ -103,27 +98,17 @@ legend("topright", legend = c("Topic 1", "Topic 2", "Topic 11", "Topic 13", "Top
 ggsave("topic_time_effect.png", width = 10, height = 8, dpi = 300)
 
 
-# Install and load the 'tidytext' package
-if (!requireNamespace("tidytext", quietly = TRUE)) {
-  install.packages("tidytext")
-}
-library("tidytext")
-
 # Create a document-topic matrix
-
 theta <- tidy(First_STM, matrix = "theta")
 doc_topic_matrix <- spread(theta, key = "topic", value = "gamma")
 rownames(doc_topic_matrix) <- doc_topic_matrix$document
 doc_topic_matrix$document <- NULL
 
 # Calculate topic proportions for each document
-
 topic_proportions <- apply(doc_topic_matrix, 1, function(x) x / sum(x))
 
 # Add topic proportions to the original data frame
-
 df_topics <- cbind(df, topic_proportions)
 
 # Save the document-topic proportions data frame to a CSV file
-
 write.csv(df_topics, "document_topic_proportions.csv
